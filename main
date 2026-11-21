@@ -9702,3 +9702,293 @@ task.defer(function()
     local open=Instance.new("TextButton"); open.Size=UDim2.fromOffset(84,30); open.Position=UDim2.new(1,-94,0,7); open.BackgroundColor3=Color3.fromRGB(67,52,145); open.Text="OPEN"; open.TextColor3=Color3.new(1,1,1); open.Font=Enum.Font.GothamBold; open.TextSize=10; open.Parent=row; Instance.new("UICorner",open).CornerRadius=UDim.new(0,7); open.Activated:Connect(openResizer)
 end)
 ]====]))()
+-- ECLIPSE — FLYING CARPET
+-- ON (black) = carpet controller active. OFF (white) = does nothing.
+-- Toggle ON, then equip a "Flying Carpet" tool (or toggle ON while holding it).
+-- Speed box sets steady horizontal speed. RightCtrl hides / shows the window.
+
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+local __ok, __err = xpcall(function()
+
+local Players          = game:GetService("Players")
+local RunService       = game:GetService("RunService")
+local TweenService     = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace        = game:GetService("Workspace")
+local LP = Players.LocalPlayer
+local ALIVE = true
+
+------------------------------------------------------------
+-- config / state
+------------------------------------------------------------
+local TOOL_NAME = "Flying Carpet"
+local DESTROY_NAMES = { FlightHold = true, FlightPower = true, FlightSpin = true }
+
+local enabled = false
+local moveSpeed = 50
+local connections = {}
+local character, humanoid, hrp
+local carpetActive = false
+local lastTool = nil
+
+------------------------------------------------------------
+-- core
+------------------------------------------------------------
+local function KillSitAnim()
+    if not humanoid then return end
+    for _, track in ipairs(humanoid:GetPlayingAnimationTracks()) do
+        if track.Name:lower():find("sit") then pcall(function() track:Stop() end) end
+    end
+end
+
+local function SweepHRP()
+    if not hrp then return end
+    for _, obj in ipairs(hrp:GetChildren()) do
+        if DESTROY_NAMES[obj.Name] then pcall(function() obj:Destroy() end) end
+    end
+end
+
+local function ApplySpeed()
+    if not hrp or not humanoid then return end
+    local moveDir = humanoid.MoveDirection
+    local v = hrp.AssemblyLinearVelocity
+    if moveDir.Magnitude > 0.1 then
+        hrp.AssemblyLinearVelocity = Vector3.new(moveDir.X * moveSpeed, v.Y, moveDir.Z * moveSpeed)
+    else
+        hrp.AssemblyLinearVelocity = Vector3.new(0, v.Y, 0)
+    end
+end
+
+local function EquippedTool()
+    return character and character:FindFirstChildOfClass("Tool") or nil
+end
+
+local function disconnectAll()
+    for k, c in pairs(connections) do
+        if typeof(c) == "RBXScriptConnection" then pcall(function() c:Disconnect() end) end
+        connections[k] = nil
+    end
+end
+
+local function activateCarpet(tool)
+    carpetActive = true
+    lastTool = tool
+    SweepHRP()
+    KillSitAnim()
+    pcall(function() tool:Activate() end)   -- activate ONCE on equip
+end
+
+local function startToolWatcher()
+    if not character then return end
+    if connections.toolAdded then connections.toolAdded:Disconnect() end
+    if connections.toolRemoved then connections.toolRemoved:Disconnect() end
+
+    connections.toolAdded = character.ChildAdded:Connect(function(obj)
+        if not enabled or not obj:IsA("Tool") or obj.Name ~= TOOL_NAME then return end
+        activateCarpet(obj)
+    end)
+    connections.toolRemoved = character.ChildRemoved:Connect(function(obj)
+        if obj:IsA("Tool") and obj == lastTool then
+            carpetActive = false
+            lastTool = nil
+        end
+    end)
+end
+
+local function attachHRPWatcher()
+    if not hrp then return end
+    if connections.hrpWatcher then connections.hrpWatcher:Disconnect() end
+    connections.hrpWatcher = hrp.ChildAdded:Connect(function(obj)
+        if enabled and carpetActive and DESTROY_NAMES[obj.Name] then
+            task.defer(function() pcall(function() obj:Destroy() end) end)
+        end
+    end)
+end
+
+local function hookAll()
+    startToolWatcher()
+    attachHRPWatcher()
+    local cur = EquippedTool()
+    if cur and cur.Name == TOOL_NAME then activateCarpet(cur) end
+end
+
+------------------------------------------------------------
+-- character
+------------------------------------------------------------
+local function setupCharacter(char)
+    character = char
+    humanoid = char:WaitForChild("Humanoid")
+    hrp = char:WaitForChild("HumanoidRootPart")
+end
+
+if LP.Character then task.spawn(setupCharacter, LP.Character) end
+LP.CharacterAdded:Connect(function(char)
+    carpetActive, lastTool = false, nil
+    setupCharacter(char)
+    task.wait(0.5)
+    if enabled and ALIVE then
+        pcall(SweepHRP)
+        hookAll()   -- re-hook watchers on the new body
+    end
+end)
+
+------------------------------------------------------------
+-- main loop
+------------------------------------------------------------
+RunService.Heartbeat:Connect(function()
+    if not ALIVE or not enabled or not carpetActive then return end
+    if not (character and hrp and humanoid) or humanoid.Health <= 0 then return end
+    local tool = EquippedTool()
+    if tool and tool.Name == TOOL_NAME then
+        SweepHRP()
+        KillSitAnim()
+        ApplySpeed()
+    else
+        carpetActive = false
+    end
+end)
+
+local function setEnabled(on)
+    enabled = on
+    carpetActive, lastTool = false, nil
+    if on then hookAll() else disconnectAll() end
+end
+
+------------------------------------------------------------
+-- GUI (Eclipse style)
+------------------------------------------------------------
+local C = {
+    WIN = Color3.fromRGB(10, 10, 10), TOP = Color3.fromRGB(26, 26, 26), ELEM = Color3.fromRGB(34, 34, 34),
+    SEP = Color3.fromRGB(48, 48, 48), DIM = Color3.fromRGB(150, 150, 150), TEXT = Color3.fromRGB(240, 240, 240),
+    WHITE = Color3.new(1, 1, 1), BLACK = Color3.fromRGB(8, 8, 8),
+}
+local FAMILY = "rbxasset://fonts/families/GothamSSm.json"
+pcall(function() FAMILY = Font.fromEnum(Enum.Font.BuilderSans).Family end)
+local function mkFont(w) local ok, f = pcall(function() return Font.new(FAMILY, w) end) return ok and f or Font.fromEnum(Enum.Font.GothamBold) end
+local function new(class, props, parent)
+    local o = Instance.new(class)
+    for k, v in pairs(props or {}) do pcall(function() o[k] = v end) end
+    if parent then o.Parent = parent end
+    return o
+end
+local function round(o, r) return new("UICorner", { CornerRadius = UDim.new(0, r) }, o) end
+local function stroke(o, color, t) return new("UIStroke", { Color = color or C.SEP, Thickness = t or 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, o) end
+local function text(parent, str, size, weight, color, xa)
+    return new("TextLabel", { BackgroundTransparency = 1, Text = str or "", TextSize = size, TextColor3 = color or C.TEXT,
+        TextXAlignment = xa or Enum.TextXAlignment.Left, FontFace = mkFont(weight or Enum.FontWeight.Medium),
+        TextTruncate = Enum.TextTruncate.AtEnd }, parent)
+end
+
+-- remove old copies
+pcall(function()
+    for _, where in ipairs({ gethui and gethui() or nil, game:GetService("CoreGui"), LP:FindFirstChild("PlayerGui") }) do
+        for _, n in ipairs({ "EclipseCarpet", "FlyingCarpetGUI" }) do
+            local old = where and where:FindFirstChild(n)
+            if old then old:Destroy() end
+        end
+    end
+end)
+
+local gui = new("ScreenGui", { Name = "EclipseCarpet", ResetOnSpawn = false, IgnoreGuiInset = true, DisplayOrder = 1000,
+    ZIndexBehavior = Enum.ZIndexBehavior.Sibling })
+if not pcall(function() gui.Parent = gethui() end) or not gui.Parent then
+    if not pcall(function() gui.Parent = game:GetService("CoreGui") end) or not gui.Parent then gui.Parent = LP:WaitForChild("PlayerGui") end
+end
+gui.AncestryChanged:Connect(function() if gui.Parent == nil then ALIVE = false setEnabled(false) end end)
+
+local frame = new("Frame", { Size = UDim2.fromOffset(200, 156), Position = UDim2.new(0, 40, 0.5, -78),
+    BackgroundColor3 = C.WHITE, BackgroundTransparency = 0.28, BorderSizePixel = 0, Active = true }, gui)
+round(frame, 14)
+new("UIGradient", { Rotation = 90, Color = ColorSequence.new(C.TOP, C.WIN) }, frame)
+local outline = stroke(frame, C.WHITE, 1.4)
+local shine = new("UIGradient", { Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, C.SEP), ColorSequenceKeypoint.new(0.4, C.SEP),
+    ColorSequenceKeypoint.new(0.5, C.WHITE), ColorSequenceKeypoint.new(0.6, C.SEP), ColorSequenceKeypoint.new(1, C.SEP) }) }, outline)
+task.spawn(function() while ALIVE do shine.Rotation = (shine.Rotation + 2) % 360 RunService.RenderStepped:Wait() end end)
+local scale = new("UIScale", {}, frame)
+pcall(function()
+    local vp = Workspace.CurrentCamera.ViewportSize
+    local mobile = UserInputService.TouchEnabled and (not UserInputService.KeyboardEnabled or math.min(vp.X, vp.Y) < 600)
+    scale.Scale = (mobile and math.clamp(vp.Y / 520, 0.7, 1) or math.clamp(vp.Y / 960, 0.85, 1.3))
+end)
+
+local title = text(frame, "ECLIPSE  ·  FLYING CARPET", 11, Enum.FontWeight.Bold, C.DIM)
+title.Position = UDim2.fromOffset(14, 9) title.Size = UDim2.new(1, -28, 0, 14)
+new("Frame", { Position = UDim2.new(0, 12, 0, 28), Size = UDim2.new(1, -24, 0, 1), BackgroundColor3 = C.SEP, BorderSizePixel = 0 }, frame)
+
+-- toggle
+local toggle = new("TextButton", { Position = UDim2.fromOffset(12, 40), Size = UDim2.new(1, -24, 0, 54), BackgroundColor3 = C.WHITE,
+    BackgroundTransparency = 0.05, BorderSizePixel = 0, AutoButtonColor = false, Text = "OFF", TextSize = 18,
+    TextColor3 = C.WIN, FontFace = mkFont(Enum.FontWeight.Bold) }, frame)
+round(toggle, 10)
+local tStroke = stroke(toggle, C.SEP, 1)
+
+-- speed row
+local speedRow = new("Frame", { Position = UDim2.fromOffset(12, 104), Size = UDim2.new(1, -24, 0, 38),
+    BackgroundColor3 = C.ELEM, BackgroundTransparency = 0.1, BorderSizePixel = 0 }, frame)
+round(speedRow, 10)
+local rowStroke = stroke(speedRow, C.SEP, 1)
+local speedLabel = text(speedRow, "SPEED", 11, Enum.FontWeight.Bold, C.DIM)
+speedLabel.Position = UDim2.fromOffset(12, 0) speedLabel.Size = UDim2.new(0, 60, 1, 0)
+
+local speedBox = new("TextBox", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -6, 0.5, 0), Size = UDim2.fromOffset(84, 26),
+    BackgroundColor3 = C.WIN, BackgroundTransparency = 0.1, BorderSizePixel = 0, Text = tostring(moveSpeed), PlaceholderText = "50",
+    PlaceholderColor3 = C.DIM, TextColor3 = C.TEXT, TextSize = 14, FontFace = mkFont(Enum.FontWeight.SemiBold),
+    ClearTextOnFocus = false, TextXAlignment = Enum.TextXAlignment.Center }, speedRow)
+round(speedBox, 7)
+local boxStroke = stroke(speedBox, C.SEP, 1)
+
+speedBox.Focused:Connect(function() boxStroke.Color = C.WHITE rowStroke.Color = C.DIM end)
+speedBox.FocusLost:Connect(function()
+    boxStroke.Color = C.SEP rowStroke.Color = C.SEP
+    local num = tonumber(speedBox.Text)
+    if num and num > 0 and num <= 5000 then moveSpeed = num end
+    speedBox.Text = tostring(moveSpeed)
+end)
+
+local function paint()
+    if enabled then
+        TweenService:Create(toggle, TweenInfo.new(0.18), { BackgroundColor3 = C.BLACK, BackgroundTransparency = 0 }):Play()
+        toggle.Text = "ON"
+        toggle.TextColor3 = C.WHITE
+        tStroke.Color = C.WHITE
+    else
+        TweenService:Create(toggle, TweenInfo.new(0.18), { BackgroundColor3 = C.WHITE, BackgroundTransparency = 0.05 }):Play()
+        toggle.Text = "OFF"
+        toggle.TextColor3 = C.WIN
+        tStroke.Color = C.SEP
+    end
+end
+
+toggle.MouseButton1Click:Connect(function()
+    setEnabled(not enabled)
+    paint()
+end)
+paint()
+
+------------------------------------------------------------
+-- drag (anywhere on window) + hide
+------------------------------------------------------------
+do
+    local dragging, startP, startPos
+    frame.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+            -- drag from anywhere on the window (buttons/textbox still click normally)
+            dragging, startP, startPos = true, i.Position, frame.Position
+            i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(i)
+        if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+            local d = (i.Position - startP) / math.max(scale.Scale, 0.01)
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+        end
+    end)
+end
+UserInputService.InputBegan:Connect(function(i, gp)
+    if not gp and i.KeyCode == Enum.KeyCode.RightControl then frame.Visible = not frame.Visible end
+end)
+
+print("[Eclipse Flying Carpet] loaded — toggle ON, equip 'Flying Carpet'. RightCtrl hides it")
+
+end, function(err) warn("[Eclipse Flying Carpet] fatal error: " .. tostring(err)) end)
