@@ -6,5 +6,13 @@
     "redeemedTag": "k6l2.",
     "expiresAt": 1795450769903,
     "hwid": null
+  },
+  "ECLIPSE-LIFETIME-AC08C99689FA": {
+    "duration": "lifetime",
+    "createdAt": 1795364560463,
+    "redeemedBy": null,
+    "redeemedTag": null,
+    "expiresAt": null,
+    "hwid": null
   }
 }
