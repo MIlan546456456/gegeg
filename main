@@ -60,6 +60,9 @@ Env.DatShawnsScriptsSettings = Env.DatShawnsScriptsSettings or {
 	APSpamPosition = UDim2.new(0.5, -202, 0.25, 0),
 	APConfigPosition = UDim2.new(0.08, 0, 0.12, 0),
 	APConfigBubblePosition = UDim2.new(0.04, 0, 0.40, 0),
+	XDSpamPosition = UDim2.fromOffset(40, 120),
+	XDBubblePosition = UDim2.new(0.04, 0, 0.40, 0),
+	XDCfgPosition = UDim2.fromOffset(350, 120),
 	DefensePosition = UDim2.new(0.5, -145, 0.5, -60),
 	ActionsPosition = UDim2.new(0.5, 155, 0.5, -100),
 	AutoPotion = false,
@@ -76,6 +79,7 @@ Env.DatShawnsScriptsSettings = Env.DatShawnsScriptsSettings or {
 	QuickPanel = true,
 	CooldownPanel = false,
 	APSpam = false,
+	XDSpam = false,
 	DefensePanel = false,
 	ActionsPanel = false,
 	AutoDefense = false,
@@ -111,6 +115,9 @@ Settings.CooldownPanelPosition = Settings.CooldownPanelPosition or UDim2.new(0, 
 Settings.APSpamPosition = Settings.APSpamPosition or UDim2.new(0.5, -202, 0.25, 0)
 Settings.APConfigPosition = Settings.APConfigPosition or UDim2.new(0.08, 0, 0.12, 0)
 Settings.APConfigBubblePosition = Settings.APConfigBubblePosition or UDim2.new(0.04, 0, 0.40, 0)
+Settings.XDSpamPosition = Settings.XDSpamPosition or UDim2.fromOffset(40, 120)
+Settings.XDBubblePosition = Settings.XDBubblePosition or UDim2.new(0.04, 0, 0.40, 0)
+Settings.XDCfgPosition = Settings.XDCfgPosition or UDim2.fromOffset(350, 120)
 Settings.DefensePosition = Settings.DefensePosition or UDim2.new(0.5, -145, 0.5, -60)
 Settings.ActionsPosition = Settings.ActionsPosition or UDim2.new(0.5, 155, 0.5, -100)
 Settings.BoosterMiniPosition = Settings.BoosterMiniPosition or UDim2.new(0, 105, 0.5, 130)
@@ -183,6 +190,9 @@ if typeof(isfile) == "function" and typeof(readfile) == "function" and isfile(SE
 		Settings.APSpamPosition = arrayToPosition(saved.APSpamPosition, Settings.APSpamPosition)
 		Settings.APConfigPosition = arrayToPosition(saved.APConfigPosition, Settings.APConfigPosition)
 		Settings.APConfigBubblePosition = arrayToPosition(saved.APConfigBubblePosition, Settings.APConfigBubblePosition)
+		Settings.XDSpamPosition = arrayToPosition(saved.XDSpamPosition, Settings.XDSpamPosition)
+		Settings.XDBubblePosition = arrayToPosition(saved.XDBubblePosition, Settings.XDBubblePosition)
+		Settings.XDCfgPosition = arrayToPosition(saved.XDCfgPosition, Settings.XDCfgPosition)
 		Settings.DefensePosition = arrayToPosition(saved.DefensePosition, Settings.DefensePosition)
 		Settings.ActionsPosition = arrayToPosition(saved.ActionsPosition, Settings.ActionsPosition)
 		Settings.AutoPotion = saved.AutoPotion == true
@@ -199,6 +209,7 @@ if typeof(isfile) == "function" and typeof(readfile) == "function" and isfile(SE
 		Settings.QuickPanel = saved.QuickPanel ~= false
 		Settings.CooldownPanel = saved.CooldownPanel == true
 		Settings.APSpam = saved.APSpam == true
+		Settings.XDSpam = saved.XDSpam == true
 		Settings.DefensePanel = saved.DefensePanel == true
 		Settings.ActionsPanel = saved.ActionsPanel == true
 		Settings.AutoDefense = saved.AutoDefense == true
@@ -255,6 +266,7 @@ local State = {
 	QuickPanel = Settings.QuickPanel ~= false,
 	CooldownPanel = Settings.CooldownPanel == true,
 	APSpam = Settings.APSpam == true,
+	XDSpam = Settings.XDSpam == true,
 	DefensePanel = Settings.DefensePanel == true,
 	ActionsPanel = Settings.ActionsPanel == true,
 	AutoDefense = Settings.AutoDefense == true,
@@ -362,7 +374,7 @@ local QuickPickup = (function()
 	return controller
 end)()
 
-local Main, ShawnButton, HubBanner, BoosterMini, QuickPanel, CooldownPanel, APSpamPanel, APConfigFrame, APConfigBubble, DefensePanel, ActionsPanel
+local Main, ShawnButton, HubBanner, BoosterMini, QuickPanel, CooldownPanel, APSpamPanel, APConfigFrame, APConfigBubble, XDSpamPanel, XDBubble, XDCfgFrame, DefensePanel, ActionsPanel
 local GlobalLockButton
 
 local function applyGlobalGuiLock()
@@ -380,6 +392,9 @@ local function applyGlobalGuiLock()
 	apply(APSpamPanel)
 	apply(APConfigFrame)
 	apply(APConfigBubble)
+	apply(XDSpamPanel)
+	apply(XDBubble)
+	apply(XDCfgFrame)
 	apply(DefensePanel)
 	apply(ActionsPanel)
 	Env.DatShawnGlobalGuiLocked = locked
@@ -428,6 +443,7 @@ local function saveSettings()
 	Settings.QuickPanel = State.QuickPanel
 	Settings.CooldownPanel = State.CooldownPanel
 	Settings.APSpam = State.APSpam
+	Settings.XDSpam = State.XDSpam
 	Settings.DefensePanel = State.DefensePanel
 	Settings.ActionsPanel = State.ActionsPanel
 	Settings.AutoDefense = State.AutoDefense
@@ -452,6 +468,9 @@ local function saveSettings()
 	if APSpamPanel then Settings.APSpamPosition = APSpamPanel.Position end
 	if APConfigFrame then Settings.APConfigPosition = APConfigFrame.Position end
 	if APConfigBubble then Settings.APConfigBubblePosition = APConfigBubble.Position end
+	if XDSpamPanel then Settings.XDSpamPosition = XDSpamPanel.Position end
+	if XDBubble then Settings.XDBubblePosition = XDBubble.Position end
+	if XDCfgFrame then Settings.XDCfgPosition = XDCfgFrame.Position end
 	if DefensePanel then Settings.DefensePosition = DefensePanel.Position end
 	if ActionsPanel then Settings.ActionsPosition = ActionsPanel.Position end
 
@@ -497,6 +516,9 @@ local function saveSettings()
 			APSpamPosition = positionToArray(Settings.APSpamPosition),
 			APConfigPosition = positionToArray(Settings.APConfigPosition),
 			APConfigBubblePosition = positionToArray(Settings.APConfigBubblePosition),
+			XDSpamPosition = positionToArray(Settings.XDSpamPosition),
+			XDBubblePosition = positionToArray(Settings.XDBubblePosition),
+			XDCfgPosition = positionToArray(Settings.XDCfgPosition),
 			DefensePosition = positionToArray(Settings.DefensePosition),
 			ActionsPosition = positionToArray(Settings.ActionsPosition),
 			AutoPotion = State.AutoPotion,
@@ -513,6 +535,7 @@ local function saveSettings()
 			QuickPanel = State.QuickPanel,
 			CooldownPanel = State.CooldownPanel,
 			APSpam = State.APSpam,
+			XDSpam = State.XDSpam,
 			DefensePanel = State.DefensePanel,
 			ActionsPanel = State.ActionsPanel,
 			AutoDefense = State.AutoDefense,
@@ -1024,6 +1047,45 @@ Env.DatShawnBoosterSync = function(enabled, speed, giantMode)
     if Booster.userEnabled ~= (enabled == true) then Booster.set(enabled) end
 end
 Booster.set(Config.get("booster_on", false))
+
+-- AUTO CARRY SLOW: while a Brainrot is being carried, suspend the speed
+-- booster and apply a controlled carry speed. Restore the prior speed and
+-- resume the user's booster as soon as the carry attribute clears.
+do
+    local AUTO_CARRY_SLOW_SPEED = 10
+    local slowActive = false
+    local slowHumanoid = nil
+    local savedWalkSpeed = nil
+
+    RunService.Heartbeat:Connect(function()
+        local char = _LP.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        local carrying = _FH_IsCarryingPet(_LP)
+
+        if carrying and hum then
+            if not slowActive or slowHumanoid ~= hum then
+                if slowActive and slowHumanoid and slowHumanoid.Parent and savedWalkSpeed then
+                    slowHumanoid.WalkSpeed = savedWalkSpeed
+                end
+                slowHumanoid = hum
+                savedWalkSpeed = hum.WalkSpeed
+                slowActive = true
+                Booster.suspend("AutoCarrySlow")
+            end
+            if hum.WalkSpeed ~= AUTO_CARRY_SLOW_SPEED then
+                hum.WalkSpeed = AUTO_CARRY_SLOW_SPEED
+            end
+        elseif slowActive then
+            if slowHumanoid and slowHumanoid.Parent and savedWalkSpeed then
+                slowHumanoid.WalkSpeed = savedWalkSpeed
+            end
+            slowActive = false
+            slowHumanoid = nil
+            savedWalkSpeed = nil
+            Booster.unsuspend("AutoCarrySlow")
+        end
+    end)
+end
 
 ]====]))()
 
@@ -3295,6 +3357,342 @@ connect(APConfigBubble.MouseButton1Click, function()
 end)
 
 
+-- XD SPAM: exact standalone xd spam GUI, integrated into DatShawn Hub.
+-- The visual layout, colors, spacing, bubble, CFG window, and player rows mirror the
+-- standalone xd spam source. Its command/config state is synchronized with DatShawn AP SPAM.
+XDSpamPanel = Instance.new("Frame")
+XDSpamPanel.Name = "Root"
+XDSpamPanel.Size = UDim2.fromOffset(300, 380)
+XDSpamPanel.Position = Settings.XDSpamPosition or UDim2.fromOffset(40, 120)
+XDSpamPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+XDSpamPanel.BorderSizePixel = 0
+XDSpamPanel.BackgroundTransparency = 0.08
+XDSpamPanel.Parent = GUI
+
+local XDUIStroke = Instance.new("UIStroke")
+XDUIStroke.Thickness = 1
+XDUIStroke.Color = Color3.fromRGB(255, 70, 85)
+XDUIStroke.Transparency = 0.25
+XDUIStroke.Parent = XDSpamPanel
+local XDUICorner = Instance.new("UICorner")
+XDUICorner.CornerRadius = UDim.new(0, 12)
+XDUICorner.Parent = XDSpamPanel
+
+local XDTopBar = Instance.new("Frame")
+XDTopBar.Name = "TopBar"
+XDTopBar.Size = UDim2.new(1, 0, 0, 36)
+XDTopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+XDTopBar.BorderSizePixel = 0
+XDTopBar.Parent = XDSpamPanel
+local XDTopBarCorner = Instance.new("UICorner")
+XDTopBarCorner.CornerRadius = UDim.new(0, 12)
+XDTopBarCorner.Parent = XDTopBar
+
+local XDTitle = Instance.new("TextLabel")
+XDTitle.Name = "Title"
+XDTitle.BackgroundTransparency = 1
+XDTitle.Size = UDim2.new(1, -90, 1, 0)
+XDTitle.Position = UDim2.fromOffset(12, 0)
+XDTitle.Font = Enum.Font.GothamBold
+XDTitle.TextSize = 16
+XDTitle.TextXAlignment = Enum.TextXAlignment.Left
+XDTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
+XDTitle.Text = "xd spam"
+XDTitle.Parent = XDTopBar
+
+local XDHolder = Instance.new("Frame")
+XDHolder.Name = "Holder"
+XDHolder.BackgroundTransparency = 1
+XDHolder.Size = UDim2.new(1, -16, 1, -52)
+XDHolder.Position = UDim2.fromOffset(8, 44)
+XDHolder.Parent = XDSpamPanel
+
+local XDList = Instance.new("ScrollingFrame")
+XDList.Name = "List"
+XDList.Active = true
+XDList.ScrollingDirection = Enum.ScrollingDirection.Y
+XDList.ScrollBarThickness = 6
+XDList.BackgroundTransparency = 1
+XDList.BorderSizePixel = 0
+XDList.Size = UDim2.new(1, 0, 1, 0)
+XDList.CanvasSize = UDim2.fromOffset(0, 0)
+XDList.Parent = XDHolder
+local XDLayout = Instance.new("UIListLayout")
+XDLayout.Padding = UDim.new(0, 6)
+XDLayout.SortOrder = Enum.SortOrder.LayoutOrder
+XDLayout.Parent = XDList
+local XDPadding = Instance.new("UIPadding")
+XDPadding.PaddingTop = UDim.new(0, 4)
+XDPadding.PaddingLeft = UDim.new(0, 2)
+XDPadding.PaddingRight = UDim.new(0, 2)
+XDPadding.PaddingBottom = UDim.new(0, 8)
+XDPadding.Parent = XDList
+
+-- Exact standalone-style custom dragging, gated by DatShawn's global GUI lock.
+local xdDragging, xdDragStart, xdStartPos
+local function updateXDDrag(input)
+	if Settings.GlobalGuiLocked then return end
+	local delta = input.Position - xdDragStart
+	XDSpamPanel.Position = UDim2.fromOffset(xdStartPos.X.Offset + delta.X, xdStartPos.Y.Offset + delta.Y)
+end
+XDSpamPanel.InputBegan:Connect(function(input)
+	if Settings.GlobalGuiLocked then return end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		xdDragging = true
+		xdDragStart = input.Position
+		xdStartPos = XDSpamPanel.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then xdDragging = false end
+		end)
+	end
+end)
+XDSpamPanel.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement and xdDragging then
+		updateXDDrag(input)
+	end
+end)
+connect(XDSpamPanel:GetPropertyChangedSignal("Position"), function()
+	Settings.XDSpamPosition = XDSpamPanel.Position
+	queuePositionSave()
+end)
+
+-- Exact standalone-style XD SPAM configuration bubble.
+XDBubble = Instance.new("TextButton")
+XDBubble.Name = "Bubble"
+XDBubble.Size = UDim2.fromOffset(96, 30)
+XDBubble.Position = Settings.XDBubblePosition or UDim2.new(0.04, 0, 0.40, 0)
+XDBubble.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+XDBubble.AutoButtonColor = false
+XDBubble.Font = Enum.Font.GothamBold
+XDBubble.Text = "xd spam"
+XDBubble.TextColor3 = Color3.fromRGB(235, 235, 235)
+XDBubble.TextSize = 11
+XDBubble.Draggable = not Settings.GlobalGuiLocked
+XDBubble.Active = true
+XDBubble.ZIndex = 100
+XDBubble.BorderSizePixel = 0
+XDBubble.Parent = GUI
+Instance.new("UICorner", XDBubble).CornerRadius = UDim.new(0, 8)
+local XDBubbleStroke = Instance.new("UIStroke", XDBubble)
+XDBubbleStroke.Color = Color3.fromRGB(255, 70, 85)
+XDBubbleStroke.Thickness = 1
+XDBubbleStroke.Transparency = 0.25
+XDBubbleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+connect(XDBubble:GetPropertyChangedSignal("Position"), function()
+	Settings.XDBubblePosition = XDBubble.Position
+	queuePositionSave()
+end)
+local xdBubbleDragged, xdBubbleDragStart = false, nil
+XDBubble.MouseButton1Down:Connect(function()
+	xdBubbleDragged = false
+	xdBubbleDragStart = XDBubble.AbsolutePosition
+end)
+XDBubble:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+	if xdBubbleDragStart and (XDBubble.AbsolutePosition - xdBubbleDragStart).Magnitude > 6 then
+		xdBubbleDragged = true
+	end
+end)
+
+-- Exact standalone-style CFG frame. Its toggles directly read/write DatShawn's shared AP config.
+XDCfgFrame = Instance.new("Frame")
+XDCfgFrame.Name = ""
+XDCfgFrame.Size = UDim2.fromOffset(230, 292)
+XDCfgFrame.Position = Settings.XDCfgPosition or UDim2.fromOffset(350, 120)
+XDCfgFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+XDCfgFrame.BackgroundTransparency = 0.08
+XDCfgFrame.BorderSizePixel = 0
+XDCfgFrame.Visible = false
+XDCfgFrame.Parent = GUI
+Instance.new("UICorner", XDCfgFrame).CornerRadius = UDim.new(0, 12)
+local XDCfgStroke = Instance.new("UIStroke", XDCfgFrame)
+XDCfgStroke.Thickness = 1
+XDCfgStroke.Color = Color3.fromRGB(255, 70, 85)
+XDCfgStroke.Transparency = 0.25
+local XDCfgTop = Instance.new("Frame", XDCfgFrame)
+XDCfgTop.Size = UDim2.new(1, 0, 0, 32)
+XDCfgTop.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+XDCfgTop.BorderSizePixel = 0
+Instance.new("UICorner", XDCfgTop).CornerRadius = UDim.new(0, 12)
+local XDCfgTitle = Instance.new("TextLabel", XDCfgTop)
+XDCfgTitle.BackgroundTransparency = 1
+XDCfgTitle.Size = UDim2.new(1, 0, 1, 0)
+XDCfgTitle.Font = Enum.Font.GothamBold
+XDCfgTitle.TextSize = 13
+XDCfgTitle.TextColor3 = Color3.fromRGB(235, 235, 235)
+XDCfgTitle.Text = "SEMI  ·  cmd  ·  FULL"
+
+local xdCfgDrag, xdCfgStart, xdCfgOrigin = false, nil, nil
+XDCfgTop.InputBegan:Connect(function(inp)
+	if Settings.GlobalGuiLocked then return end
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+		xdCfgDrag = true; xdCfgStart = inp.Position; xdCfgOrigin = XDCfgFrame.Position
+		inp.Changed:Connect(function()
+			if inp.UserInputState == Enum.UserInputState.End then xdCfgDrag = false end
+		end)
+	end
+end)
+XDCfgTop.InputChanged:Connect(function(inp)
+	if inp.UserInputType == Enum.UserInputType.MouseMovement and xdCfgDrag and not Settings.GlobalGuiLocked then
+		local d = inp.Position - xdCfgStart
+		XDCfgFrame.Position = UDim2.fromOffset(xdCfgOrigin.X.Offset + d.X, xdCfgOrigin.Y.Offset + d.Y)
+	end
+end)
+connect(XDCfgFrame:GetPropertyChangedSignal("Position"), function()
+	Settings.XDCfgPosition = XDCfgFrame.Position
+	queuePositionSave()
+end)
+
+local XDColHolder = Instance.new("Frame", XDCfgFrame)
+XDColHolder.BackgroundTransparency = 1
+XDColHolder.Position = UDim2.new(0, 8, 0, 38)
+XDColHolder.Size = UDim2.new(1, -16, 1, -46)
+local XDSemiCol = Instance.new("Frame", XDColHolder)
+XDSemiCol.BackgroundTransparency = 1
+XDSemiCol.Size = UDim2.new(0.5, -4, 1, 0)
+XDSemiCol.Position = UDim2.new(0, 0, 0, 0)
+local XDSL = Instance.new("UIListLayout", XDSemiCol)
+XDSL.Padding = UDim.new(0, 4); XDSL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local XDFullCol = Instance.new("Frame", XDColHolder)
+XDFullCol.BackgroundTransparency = 1
+XDFullCol.Size = UDim2.new(0.5, -4, 1, 0)
+XDFullCol.Position = UDim2.new(0.5, 4, 0, 0)
+local XDFL = Instance.new("UIListLayout", XDFullCol)
+XDFL.Padding = UDim.new(0, 4); XDFL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function xdCap(s) return s:sub(1,1):upper()..s:sub(2):lower() end
+local XDCfgRefreshers = {}
+local function makeXDCfgToggle(name, parent, mode)
+	local btn = Instance.new("TextButton", parent)
+	btn.Size = UDim2.new(1, 0, 0, 26)
+	btn.Text = xdCap(name)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 12
+	btn.TextColor3 = Color3.fromRGB(235, 235, 235)
+	btn.AutoButtonColor = false
+	btn.BorderSizePixel = 0
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+	local stroke = Instance.new("UIStroke", btn)
+	stroke.Color = Color3.fromRGB(80, 80, 80); stroke.Thickness = 0.7; stroke.Transparency = 0.5
+	local function refresh()
+		local enabled = APSelectedCommands[mode][name] == true
+		btn.BackgroundColor3 = enabled
+			and Color3.fromRGB(55, 185, 80)
+			or Color3.fromRGB(200, 60, 60)
+		stroke.Color = enabled
+			and Color3.fromRGB(120, 255, 145)
+			or Color3.fromRGB(255, 120, 120)
+	end
+	refresh()
+	table.insert(XDCfgRefreshers, refresh)
+	btn.MouseButton1Click:Connect(function()
+		APSelectedCommands[mode][name] = not APSelectedCommands[mode][name]
+		Settings.APSelectedCommands = APSelectedCommands
+		saveSettings()
+		refresh()
+	end)
+end
+for _, c in ipairs(APCommandOrder) do
+	makeXDCfgToggle(c, XDSemiCol, "Semi")
+	makeXDCfgToggle(c, XDFullCol, "Full")
+end
+
+XDBubble.MouseButton1Click:Connect(function()
+	if xdBubbleDragged then return end
+	if not State.XDSpam then return end
+	XDCfgFrame.Visible = not XDCfgFrame.Visible
+	if XDCfgFrame.Visible then for _, refresh in ipairs(XDCfgRefreshers) do refresh() end end
+end)
+
+local function createXDPlayerButton(plr)
+	local btn = Instance.new("TextButton")
+	btn.Name = "P_" .. plr.UserId
+	btn.Size = UDim2.new(1, -6, 0, 34)
+	btn.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+	btn.TextColor3 = Color3.fromRGB(235, 235, 235)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.AutoButtonColor = true
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	btn.Text = ""
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = btn
+	btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(48, 48, 48) end)
+	btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(38, 38, 38) end)
+	local TextService = game:GetService("TextService")
+	local function addNameLine(text, y, height, maxSize, color)
+		local label = Instance.new("TextLabel")
+		label.BackgroundTransparency = 1
+		label.Position = UDim2.fromOffset(8, y)
+		label.Size = UDim2.new(1, -140, 0, height)
+		label.Font = Enum.Font.Gotham
+		label.Text = text
+		label.TextColor3 = color
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.TextYAlignment = Enum.TextYAlignment.Center
+		label.TextScaled = false
+		local size = maxSize
+		while size > 9 and TextService:GetTextSize(text, size, Enum.Font.Gotham, Vector2.new(10000, height)).X > 138 do
+			size = size - 1
+		end
+		label.TextSize = size
+		label.TextWrapped = false
+		label.TextTruncate = Enum.TextTruncate.AtEnd
+		label.Parent = btn
+		return label
+	end
+	addNameLine(plr.DisplayName ~= "" and plr.DisplayName or plr.Name, 3, 15, 14, Color3.fromRGB(235, 235, 235))
+	addNameLine("@" .. plr.Name, 18, 13, 11, Color3.fromRGB(180, 180, 180))
+	local SemiBtn = Instance.new("TextButton", btn)
+	SemiBtn.Text = "SEMI"
+	SemiBtn.Font = Enum.Font.GothamBold
+	SemiBtn.TextSize = 13
+	SemiBtn.TextColor3 = Color3.fromRGB(235, 235, 235)
+	SemiBtn.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+	SemiBtn.Size = UDim2.fromOffset(54, 24)
+	SemiBtn.Position = UDim2.new(1, -118, 0.5, -12)
+	SemiBtn.BorderSizePixel = 0
+	SemiBtn.AutoButtonColor = true
+	Instance.new("UICorner", SemiBtn).CornerRadius = UDim.new(0, 8)
+	local FullBtn = Instance.new("TextButton", btn)
+	FullBtn.Text = "FULL"
+	FullBtn.Font = Enum.Font.GothamBold
+	FullBtn.TextSize = 13
+	FullBtn.TextColor3 = Color3.fromRGB(235, 235, 235)
+	FullBtn.BackgroundColor3 = Color3.fromRGB(42, 42, 42)
+	FullBtn.Size = UDim2.fromOffset(54, 24)
+	FullBtn.Position = UDim2.new(1, -58, 0.5, -12)
+	FullBtn.BorderSizePixel = 0
+	FullBtn.AutoButtonColor = true
+	Instance.new("UICorner", FullBtn).CornerRadius = UDim.new(0, 8)
+	connect(SemiBtn.MouseButton1Click, function() runAPSpam(plr, "Semi") end)
+	connect(FullBtn.MouseButton1Click, function() runAPSpam(plr, "Full") end)
+	return btn
+end
+
+local function refreshXDList()
+	for _, child in ipairs(XDList:GetChildren()) do
+		if child:IsA("TextButton") then child:Destroy() end
+	end
+	local players = {}
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LP then table.insert(players, plr) end
+	end
+	table.sort(players, function(a, b) return a.Name:lower() < b.Name:lower() end)
+	for _, plr in ipairs(players) do createXDPlayerButton(plr).Parent = XDList end
+	task.defer(function() XDList.CanvasSize = UDim2.fromOffset(0, XDLayout.AbsoluteContentSize.Y + 16) end)
+end
+connect(XDLayout:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+	XDList.CanvasSize = UDim2.fromOffset(0, XDLayout.AbsoluteContentSize.Y + 16)
+end)
+connect(Players.PlayerAdded, function() task.wait(0.1); refreshXDList() end)
+connect(Players.PlayerRemoving, function() task.wait(0.1); refreshXDList() end)
+refreshXDList()
+
+XDSpamPanel.Visible = State.XDSpam
+XDBubble.Visible = State.XDSpam
+XDCfgFrame.Visible = false
+
 local function setupDefensePanel()
 	local function getMyPlot()
 		local plots = workspace:FindFirstChild("Plots")
@@ -3989,6 +4387,8 @@ local QuickPanelToggle = button("OFF", UDim2.fromOffset(265, 450), UDim2.fromOff
 local APSpamLabel = textLabel("Eclipse AP Spammer", UDim2.fromOffset(14, 489), UDim2.fromOffset(245, 28), 11, true)
 local APSpamToggle = button("OFF", UDim2.fromOffset(265, 489), UDim2.fromOffset(51, 28))
 
+local XDSpamLabel = textLabel("XD SPAM", UDim2.fromOffset(14, 528), UDim2.fromOffset(245, 28), 11, true)
+local XDSpamToggle = button("OFF", UDim2.fromOffset(265, 528), UDim2.fromOffset(51, 28))
 
 local DefensePanelLabel = textLabel("Auto Defense Panel", UDim2.fromOffset(14, 567), UDim2.fromOffset(245, 28), 11, true)
 local DefensePanelToggle = button("OFF", UDim2.fromOffset(265, 567), UDim2.fromOffset(51, 28))
@@ -4665,6 +5065,7 @@ placeHubRow(UtilsPage, 138, TradePlazaLabel, nil, TradePlazaKeyButton, TradePlaz
 placeHubRow(UtilsPage, 184, ActionsPanelLabel, nil, nil, ActionsPanelToggle)
 placeHubRow(UtilsPage, 230, QuickPanelLabel, nil, nil, QuickPanelToggle)
 placeHubRow(UtilsPage, 276, APSpamLabel, nil, nil, APSpamToggle)
+placeHubRow(UtilsPage, 322, XDSpamLabel, nil, nil, XDSpamToggle)
 placeHubRow(UtilsPage, 368, DefensePanelLabel, nil, nil, DefensePanelToggle)
 placeHubRow(UtilsPage, 414, CooldownPanelLabel, nil, nil, CooldownPanelToggle)
 
@@ -5026,6 +5427,13 @@ local function updateGUI()
 	paintToggle(ActionsPanelToggle, State.ActionsPanel, Color3.fromRGB(105, 75, 225))
 	paintToggle(QuickPanelToggle, State.QuickPanel, Color3.fromRGB(55, 145, 215))
 	paintToggle(APSpamToggle, State.APSpam, Color3.fromRGB(155, 70, 185))
+	paintToggle(XDSpamToggle, State.XDSpam, Color3.fromRGB(45, 180, 105))
+	if XDSpamToggle then
+		XDSpamToggle.BackgroundColor3 = State.XDSpam and Color3.fromRGB(45, 180, 105) or Color3.fromRGB(225, 70, 90)
+	end
+	if XDSpamPanel then XDSpamPanel.Visible = State.XDSpam end
+	if XDBubble then XDBubble.Visible = State.XDSpam end
+	if XDCfgFrame and not State.XDSpam then XDCfgFrame.Visible = false end
 	paintToggle(DefensePanelToggle, State.DefensePanel, Color3.fromRGB(205, 65, 85))
 	paintToggle(CooldownPanelToggle, State.CooldownPanel, Color3.fromRGB(65, 115, 205))
 	paintToggle(Env.DatShawnFeatureControls.BrainrotESPToggle, State.BrainrotESP, Color3.fromRGB(215, 165, 45))
@@ -5055,6 +5463,7 @@ local function updateGUI()
 	if APSpamPanel then APSpamPanel.Visible = State.APSpam end
 	if CooldownPanel then CooldownPanel.Visible = State.CooldownPanel end
 	if APConfigBubble then APConfigBubble.Visible = State.APSpam end
+	if XDSpamPanel then XDSpamPanel.Visible = State.XDSpam end
 	if DefensePanel then DefensePanel.Visible = State.DefensePanel end
 	if ActionsPanel then ActionsPanel.Visible = State.ActionsPanel end
 	if APConfigFrame and not State.APSpam then APConfigFrame.Visible = false end
@@ -5127,6 +5536,12 @@ connect(APSpamToggle.MouseButton1Click, function()
 	end
 	saveSettings(); updateGUI()
 	notify("Eclipse AP Spammer: " .. (State.APSpam and "ON" or "OFF"), State.APSpam)
+end)
+connect(XDSpamToggle.MouseButton1Click, function()
+	State.XDSpam = not State.XDSpam
+	if XDSpamPanel then XDSpamPanel.Visible = State.XDSpam end
+	saveSettings(); updateGUI()
+	notify("XD SPAM: " .. (State.XDSpam and "ON" or "OFF"), State.XDSpam)
 end)
 connect(DefensePanelToggle.MouseButton1Click, function()
 	State.DefensePanel = not State.DefensePanel
@@ -5328,6 +5743,7 @@ ctrlBind("Aimbot",AimbotToggle,function() State.Aimbot=not State.Aimbot; Env.Dat
 ctrlBind("ActionsPanel",ActionsPanelToggle,function() State.ActionsPanel=not State.ActionsPanel; if ActionsPanel then ActionsPanel.Visible=State.ActionsPanel end; saveSettings(); updateGUI(); notify("Actions Panel: "..(State.ActionsPanel and "ON" or "OFF"),State.ActionsPanel) end)
 ctrlBind("QuickPanel",QuickPanelToggle,function() State.QuickPanel=not State.QuickPanel; QuickPanel.Visible=State.QuickPanel; saveSettings(); updateGUI(); notify("Quick Panel: "..(State.QuickPanel and "ON" or "OFF"),State.QuickPanel) end)
 ctrlBind("APSpam",APSpamToggle,function() State.APSpam=not State.APSpam; APSpamPanel.Visible=State.APSpam; if not State.APSpam then APConfigFrame.Visible=false end; saveSettings(); updateGUI(); notify("Eclipse AP Spammer: "..(State.APSpam and "ON" or "OFF"),State.APSpam) end)
+ctrlBind("XDSpam",XDSpamToggle,function() State.XDSpam=not State.XDSpam; if XDSpamPanel then XDSpamPanel.Visible=State.XDSpam end; saveSettings(); updateGUI(); notify("XD SPAM: "..(State.XDSpam and "ON" or "OFF"),State.XDSpam) end)
 ctrlBind("DefensePanel",DefensePanelToggle,function() State.DefensePanel=not State.DefensePanel; if DefensePanel then DefensePanel.Visible=State.DefensePanel end; saveSettings(); updateGUI(); notify("Auto Defense Panel: "..(State.DefensePanel and "ON" or "OFF"),State.DefensePanel) end)
 ctrlBind("CooldownPanel",CooldownPanelToggle,function() State.CooldownPanel=not State.CooldownPanel; CooldownPanel.Visible=State.CooldownPanel; saveSettings(); updateGUI(); notify("Command Cooldowns: "..(State.CooldownPanel and "ON" or "OFF"),State.CooldownPanel) end)
 
@@ -9627,7 +10043,7 @@ local function registerRoot(root)
     if not root then return end
     local explicit={
         ["QUICK PANEL"]="Quick Panel", ["COMMAND COOLDOWNS"]="Command Cooldowns", ["ECLIPSE AP SPAMMER"]="Eclipse AP Spammer",
-["AUTO DEFENSE"]="Auto Defense", ["ACTIONS PANEL"]="Actions Panel", ["MY BASE TIME"]="My Base Time",
+        ["XD SPAM"]="XD Spam", ["AUTO DEFENSE"]="Auto Defense", ["ACTIONS PANEL"]="Actions Panel", ["MY BASE TIME"]="My Base Time",
         ["ECLIPSE PLAYER BOOSTER"]="Eclipse Player Booster", ["ALLOW BASE"]="Allow Base", ["STEAL PRIORITY"]="Steal Priority",
     }
     local seen={}
@@ -9644,7 +10060,7 @@ local function registerRoot(root)
     for _,child in ipairs(root:GetChildren()) do
         if isPanelCandidate(child) and not seen[child] then
             local n=child.Name; local title=n:gsub("^Mini_","")
-            if n=="BoosterMini" then title="Eclipse Player Booster" elseif n=="DatShawnAPSpam" then title="Eclipse AP Spammer" elseif n=="CommandCooldowns" then title="Command Cooldowns" end
+            if n=="Root" then title="XD Spam" elseif n=="BoosterMini" then title="Eclipse Player Booster" elseif n=="DatShawnAPSpam" then title="Eclipse AP Spammer" elseif n=="CommandCooldowns" then title="Command Cooldowns" end
             seen[child]=true; addMinimize(child,title)
         end
     end
@@ -9992,3 +10408,167 @@ end)
 print("[Eclipse Flying Carpet] loaded — toggle ON, equip 'Flying Carpet'. RightCtrl hides it")
 
 end, function(err) warn("[Eclipse Flying Carpet] fatal error: " .. tostring(err)) end)
+-- Temporary Auto Giant Booster override
+local TEMP_GIANT_SPEED = 12
+local previousBoosterSpeed = nil
+local temporaryBoostActive = false
+
+local function setTemporaryGiantBoost(active)
+    local booster = Env.DatShawnNeptuneBooster
+    if not booster then return end
+
+    if active and not temporaryBoostActive then
+        previousBoosterSpeed = booster.regularSpeed or booster.speed
+        temporaryBoostActive = true
+        booster.setSpeed(TEMP_GIANT_SPEED)
+        booster.setEffectiveSpeed(TEMP_GIANT_SPEED, true)
+
+    elseif not active and temporaryBoostActive then
+        temporaryBoostActive = false
+
+        if previousBoosterSpeed then
+            booster.setSpeed(previousBoosterSpeed)
+            booster.setEffectiveSpeed(previousBoosterSpeed, false)
+        end
+
+        previousBoosterSpeed = nil
+    end
+end-- AUTO CARRY SLOW + SHAKE: while carrying a brainrot, suspend the booster,
+-- slow to 10, and shake the camera hard. Restores everything when done.
+do
+    local AUTO_CARRY_SLOW_SPEED = 10
+    local SHAKE_INTENSITY = 0.85     -- crank this up for more violence
+    local SHAKE_SPEED     = 55       -- how fast it jitters
+    local slowActive   = false
+    local slowHumanoid = nil
+    local savedWalkSpeed = nil
+    local shakeConn    = nil
+    local baseOffset   = Vector3.zero
+    local shakeT       = 0
+
+    local function startShake(hum)
+        if shakeConn then return end
+        baseOffset = hum.CameraOffset
+        shakeT = 0
+        shakeConn = RunService.RenderStepped:Connect(function(dt)
+            if not slowActive or not hum or not hum.Parent then
+                if shakeConn then shakeConn:Disconnect(); shakeConn = nil end
+                if hum and hum.Parent then hum.CameraOffset = baseOffset end
+                return
+            end
+            shakeT += dt * SHAKE_SPEED
+            local ox = (math.noise(shakeT, 0, 0) * 2 - 1) * SHAKE_INTENSITY
+            local oy = (math.noise(0, shakeT, 0) * 2 - 1) * SHAKE_INTENSITY
+            local oz = (math.noise(0, 0, shakeT) * 2 - 1) * SHAKE_INTENSITY * 0.5
+            hum.CameraOffset = baseOffset + Vector3.new(ox, oy, oz)
+        end)
+    end
+
+    local function stopShake()
+        if shakeConn then shakeConn:Disconnect(); shakeConn = nil end
+        if slowHumanoid and slowHumanoid.Parent then
+            slowHumanoid.CameraOffset = baseOffset
+        end
+    end
+
+    RunService.Heartbeat:Connect(function()
+        local char = _LP.Character
+        local hum  = char and char:FindFirstChildOfClass("Humanoid")
+        local carrying = _FH_IsCarryingPet(_LP)
+
+        if carrying and hum then
+            if not slowActive or slowHumanoid ~= hum then
+                stopShake()
+                if slowActive and slowHumanoid and slowHumanoid.Parent and savedWalkSpeed then
+                    slowHumanoid.WalkSpeed = savedWalkSpeed
+                end
+                slowHumanoid  = hum
+                savedWalkSpeed = hum.WalkSpeed
+                slowActive    = true
+                Booster.suspend("AutoCarrySlow")
+                startShake(hum)
+            end
+            if hum.WalkSpeed ~= AUTO_CARRY_SLOW_SPEED then
+                hum.WalkSpeed = AUTO_CARRY_SLOW_SPEED
+            end
+        elseif slowActive then
+            stopShake()
+            if slowHumanoid and slowHumanoid.Parent and savedWalkSpeed then
+                slowHumanoid.WalkSpeed = savedWalkSpeed
+            end
+            slowActive = false
+            slowHumanoid = nil
+            savedWalkSpeed = nil
+            Booster.unsuspend("AutoCarrySlow")
+        end
+    end)
+end-- AUTO CARRY SLOW + SHAKE: while carrying a brainrot, suspend the booster,
+-- slow to 10, and shake the camera hard. Restores everything when done.
+do
+    local AUTO_CARRY_SLOW_SPEED = 10
+    local SHAKE_INTENSITY = 0.85
+    local SHAKE_SPEED     = 55
+    local slowActive   = false
+    local slowHumanoid = nil
+    local savedWalkSpeed = nil
+    local shakeConn    = nil
+    local baseOffset   = Vector3.zero
+    local shakeT       = 0
+
+    local function startShake(hum)
+        if shakeConn then return end
+        baseOffset = hum.CameraOffset
+        shakeT = 0
+        shakeConn = RunService.RenderStepped:Connect(function(dt)
+            if not slowActive or not hum or not hum.Parent then
+                if shakeConn then shakeConn:Disconnect(); shakeConn = nil end
+                if hum and hum.Parent then hum.CameraOffset = baseOffset end
+                return
+            end
+            shakeT += dt * SHAKE_SPEED
+            local ox = (math.noise(shakeT, 0, 0) * 2 - 1) * SHAKE_INTENSITY
+            local oy = (math.noise(0, shakeT, 0) * 2 - 1) * SHAKE_INTENSITY
+            local oz = (math.noise(0, 0, shakeT) * 2 - 1) * SHAKE_INTENSITY * 0.5
+            hum.CameraOffset = baseOffset + Vector3.new(ox, oy, oz)
+        end)
+    end
+
+    local function stopShake()
+        if shakeConn then shakeConn:Disconnect(); shakeConn = nil end
+        if slowHumanoid and slowHumanoid.Parent then
+            slowHumanoid.CameraOffset = baseOffset
+        end
+    end
+
+    RunService.Heartbeat:Connect(function()
+        local char = _LP.Character
+        local hum  = char and char:FindFirstChildOfClass("Humanoid")
+        local carrying = _FH_IsCarryingPet(_LP)
+
+        if carrying and hum then
+            if not slowActive or slowHumanoid ~= hum then
+                stopShake()
+                if slowActive and slowHumanoid and slowHumanoid.Parent and savedWalkSpeed then
+                    slowHumanoid.WalkSpeed = savedWalkSpeed
+                end
+                slowHumanoid  = hum
+                savedWalkSpeed = hum.WalkSpeed
+                slowActive    = true
+                Booster.suspend("AutoCarrySlow")
+                startShake(hum)
+            end
+            if hum.WalkSpeed ~= AUTO_CARRY_SLOW_SPEED then
+                hum.WalkSpeed = AUTO_CARRY_SLOW_SPEED
+            end
+        elseif slowActive then
+            stopShake()
+            if slowHumanoid and slowHumanoid.Parent and savedWalkSpeed then
+                slowHumanoid.WalkSpeed = savedWalkSpeed
+            end
+            slowActive = false
+            slowHumanoid = nil
+            savedWalkSpeed = nil
+            Booster.unsuspend("AutoCarrySlow")
+        end
+    end)
+endw
