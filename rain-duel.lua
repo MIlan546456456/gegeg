@@ -13,9 +13,12 @@ local StarterGui             = game:GetService("StarterGui")
 local LP = Players.LocalPlayer
 
 -- Plain HTTP (no HTTPS) endpoint from bot.py
-local VERIFY_URL           = "http://127.0.0.1:3000/verify"
-local API_SECRET           = "rainduel-dev-secret"
-local TEST_ONE_SECOND_LOSS = true -- True = loses access 1s after execution to test loss flow
+local VERIFY_URLS = {
+	"http://fi14.bot-hosting.cloud:25215/verify",
+	"http://157.180.7.55:25215/verify",
+}
+local API_SECRET = "rainduel-dev-secret"
+local TEST_ONE_SECOND_LOSS = false
 
 getgenv().RAIN_DUEL_KEY = getgenv().RAIN_DUEL_KEY or ""
 
